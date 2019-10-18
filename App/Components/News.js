@@ -4,13 +4,13 @@
 * Starter Files
 *
 * CS47
-* Oct, 2018
+* Oct, 2019
 */
 
 import React, { Component } from 'react'
-import PropTypes from 'prop-types' //consider using this!
-import { StyleSheet, SafeAreaView, View, FlatList, Text, Linking } from 'react-native'
-import { material } from 'react-native-typography' //consider using this!
+import PropTypes from 'prop-types'
+import { StyleSheet, TouchableHighlight, View, FlatList, Text, Linking, Item } from 'react-native'
+import { material } from 'react-native-typography'
 import { Metrics, Colors } from '../Themes'
 
 export default class News extends Component {
@@ -20,14 +20,40 @@ export default class News extends Component {
     articles: PropTypes.array
   }
 
-  //you can change the props above to whatever you want/need.
+  _onPress(url) {
+    Linking.canOpenURL(url)
+      .then((supported) => {
+        if (!supported) {
+          console.log("Can't handle url: " + url);
+        } else {
+          return Linking.openURL(url);
+        }
+      })
+      .catch((err) => console.error('An error occurred', err));
+  }
 
   render () {
     const {articles} = this.props;
 
     return (
       <View style={styles.container}>
-        {/*Some FlatList or SectionList*/}
+        <FlatList
+          data={articles}
+          renderItem={({ item }) => (
+            <View style={styles.article} >
+              <TouchableHighlight
+                onPress={() => this._onPress(item.url)}>
+                <View style={{backgroundColor: 'white'}}>
+                  <Text style={material.headline}>{item.title}</Text>
+                </View>
+              </TouchableHighlight>
+              <Text>{item.snippet}</Text>
+              <Text style={material.body2} >{item.byline}</Text>
+              <Text style={{color: 'gray'}} >{item.date}</Text>
+            </View>
+          )}
+          keyExtractor={item => item.url}
+        />
       </View>
     );
   }
@@ -36,6 +62,12 @@ export default class News extends Component {
 
 const styles = StyleSheet.create({
   container: {
-
+    flex: 1,
+    justifyContent: 'center',
+    paddingLeft: 20,
+    paddingRight: 20,
   },
+  article: {
+    paddingTop: 20,
+  }
 });

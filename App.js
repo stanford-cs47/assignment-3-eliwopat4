@@ -4,14 +4,13 @@
 * Starter Files
 *
 * CS47
-* Oct, 2018
+* Oct, 2019
 */
 
 import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, Image, ActivityIndicator } from 'react-native';
 import { Images, Colors } from './App/Themes'
 import APIRequest from './App/Config/APIRequest'
-
 import News from './App/Components/News'
 import Search from './App/Components/Search'
 
@@ -20,14 +19,14 @@ export default class App extends React.Component {
   state = {
     loading: true,
     articles : [],
-    searchText: '',
-    category: ''
+  }
+
+  searchAPI = (articleName) => {
+    this.loadArticles(articleName)
   }
 
   componentDidMount() {
-
-    //uncomment this to run an API query!
-    //this.loadArticles();
+    this.loadArticles();
   }
 
   async loadArticles(searchTerm = '', category = '') {
@@ -38,8 +37,21 @@ export default class App extends React.Component {
     } else {
       resultArticles = await APIRequest.requestCategoryPosts(category);
     }
-    console.log(resultArticles);
     this.setState({loading: false, articles: resultArticles})
+  }
+
+  getContent = () => {
+    const {articles, loading} = this.state;
+    let contentDisplay = null
+    if(loading) {
+      contentDisplay = <ActivityIndicator
+                          style={styles.activityindicator}
+                          size='large' color='black' />
+    } else {
+      contentDisplay = <News {...this.state}/>
+    }
+
+    return contentDisplay
   }
 
   render() {
@@ -48,17 +60,11 @@ export default class App extends React.Component {
     return (
       <SafeAreaView style={styles.container}>
 
-        <Text style={{textAlign: 'center'}}>Have fun! :) {"\n"} Start by changing the API Key in "./App/Config/AppConfig.js" {"\n"} Then, take a look at the following components: {"\n"} NavigationButtons {"\n"} Search {"\n"} News {"\n"} 🔥</Text>
-
-        {/*First, you'll need a logo*/}
-
-        {/*Then your search bar*/}
-
-        {/*And some news*/}
-
-        {/*Though, you can style and organize these however you want! power to you 😎*/}
-
-        {/*If you want to return custom stuff from the NYT API, checkout the APIRequest file!*/}
+        <Image style={styles.logo} source={require('/Users/elijahwopat/Desktop/cs47/assignment-3-eliwopat4/App/Images/nyt.png')} />
+       
+        { <Search {...this.state} searchAPI = {this.searchAPI} /> }
+        
+        { this.getContent() }
 
       </SafeAreaView>
     );
@@ -68,8 +74,13 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center'
-  }
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
+  logo: {
+    width: '90%',
+    height: 70,
+    marginBottom: 20,
+    resizeMode: 'contain',
+  },
 });
